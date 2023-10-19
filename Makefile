@@ -4,8 +4,8 @@ isoBoot = cdrom/boot
 isolinuxcfg = $(isoBoot)/isolinux/isolinux.cfg 
 work = `pwd`
 networkhelper = ./squashfs/bin/networkhelper
-stockSquashfs = cdrom/boot/core.gz
-newSquashfs = cdrom/boot/nhelper.gz
+stockSquashfs = $(isoBoot)/core.gz
+newSquashfs = $(isoBoot)/nhelper.gz
 
 networkhelper.iso : $(isolinuxcfg) $(networkhelper) $(newSquashfs)
 	@echo ### Creating ISO ###
@@ -14,7 +14,7 @@ networkhelper.iso : $(isolinuxcfg) $(networkhelper) $(newSquashfs)
 	-boot-info-table -b boot/isolinux/isolinux.bin \
 	-c boot/isolinux/boot.cat -o networkhelper.iso cdrom
 
-cdrom :
+$(isoBoot) : | $(coreIso)
 	@echo ### Extracting ISO ###
 	mkdir -p cdrom
 	7z x $(coreIso) -ocdrom -y
@@ -22,22 +22,18 @@ cdrom :
 $(coreIso) : 
 	wget $(isoUri)$(coreIso)
 
-$(networkhelper) : go.sum go.mod
+$(networkhelper) : 
 	@echo ### Building binary ###
-	GOARCH=386 go build -o /tmp/networkhelper .
+	GOARCH=386 go build -o /tmp/networkhelper ./cmd/networkhelper
 	sudo mkdir -p squashfs/bin
 	sudo cp /tmp/networkhelper $@
-
-go.sum go.mod : main.go
-	go mod tidy
-	touch go.sum go.mod
 
 cpio : 
 	mkdir -p ./cpio
 	zcat $(stockSquashfs) |\
 	sudo cpio -i -H newc -d -D ./cpio
 
-$(isolinuxcfg) : isolinux.cfg cdrom
+$(isolinuxcfg) : isolinux.cfg $(isoBoot)
 	cp ./isolinux.cfg $@
 
 $(newSquashfs) : $(networkhelper)
