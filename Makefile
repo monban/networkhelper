@@ -33,7 +33,7 @@ cpio :
 	zcat $(stockSquashfs) |\
 	sudo cpio -i -H newc -d -D ./cpio
 
-$(isolinuxcfg) : isolinux.cfg $(isoBoot)
+$(isolinuxcfg) : isolinux.cfg | $(isoBoot)
 	cp ./isolinux.cfg $@
 
 $(newSquashfs) : $(networkhelper)
