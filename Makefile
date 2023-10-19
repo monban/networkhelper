@@ -22,10 +22,12 @@ $(isoBoot) : | $(coreIso)
 $(coreIso) : 
 	wget $(isoUri)$(coreIso)
 
-$(networkhelper) : cmd/networkhelper/main.go go.mod
+$(networkhelper) : cmd/networkhelper/main.go go.mod .profile
 	@echo ### Building binary ###
 	GOARCH=386 go build -o /tmp/networkhelper ./cmd/networkhelper
 	sudo mkdir -p squashfs/bin
+	sudo mkdir -p squashfs/root
+	sudo cp .profile squashfs/root
 	sudo cp /tmp/networkhelper $@
 
 cpio : 
