@@ -25,15 +25,15 @@ $(coreIso) :
 $(networkhelper) : cmd/networkhelper/main.go go.mod .profile
 	@echo ### Building binary ###
 	GOARCH=386 go build -o /tmp/networkhelper ./cmd/networkhelper
-	sudo mkdir -p squashfs/bin
-	sudo mkdir -p squashfs/root
-	sudo cp .profile squashfs/root
-	sudo cp /tmp/networkhelper $@
+	mkdir -p squashfs/bin
+	mkdir -p squashfs/root
+	cp .profile squashfs/root
+	cp /tmp/networkhelper $@
 
 cpio : 
 	mkdir -p ./cpio
 	zcat $(stockSquashfs) |\
-	sudo cpio -i -H newc -d -D ./cpio
+	fakeroot cpio -i -H newc -d -D ./cpio
 
 $(isolinuxcfg) : isolinux.cfg | $(isoBoot)
 	cp ./isolinux.cfg $@
@@ -41,14 +41,14 @@ $(isolinuxcfg) : isolinux.cfg | $(isoBoot)
 $(newSquashfs) : $(networkhelper)
 	@echo ### Creating new initramfs ###
 	cd ./squashfs;\
-	sudo find -type f -print0 |\
-	sudo cpio -H newc -ov0 |\
+	find -type f -print0 |\
+	fakeroot cpio -H newc -ov0 |\
 	gzip -2 >\
 	 ../$@
 
 .PHONY: clean
 clean :
 	-rm -rf ./cdrom
-	-sudo rm -rf ./cpio
+	-rm -rf ./cpio
 	-rm ./networkhelper.iso
-	-sudo rm -rf squashfs
+	-rm -rf squashfs
