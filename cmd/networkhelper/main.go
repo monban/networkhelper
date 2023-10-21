@@ -24,7 +24,6 @@ func main() {
 		var ip, mask, gw string
 		ip, _ = ipinput("IP address:", "").RunPrompt()
 		ipBytes := net.ParseIP(ip)
-		log.Info("len", "ipBytes", len(ipBytes))
 		if ipBytes.To4() == nil { //ipv6 town
 			gw, _ = ipinput("Default gateway:", "").RunPrompt()
 			x("ifconfig", "eth0", ip)
