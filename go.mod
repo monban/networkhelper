@@ -3,15 +3,16 @@ module networkhelper
 go 1.21.3
 
 require (
-	github.com/charmbracelet/bubbletea v0.24.2
 	github.com/charmbracelet/log v0.2.5
 	github.com/erikgeiser/promptkit v0.9.0
+	github.com/monban/bubble-netmask v0.0.0-20231023061939-940bd1db23a6
 )
 
 require (
 	github.com/atotto/clipboard v0.1.4 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/charmbracelet/bubbles v0.16.1 // indirect
+	github.com/charmbracelet/bubbletea v0.24.2 // indirect
 	github.com/charmbracelet/lipgloss v0.9.1 // indirect
 	github.com/containerd/console v1.0.4-0.20230313162750-1ae8d489ac81 // indirect
 	github.com/go-logfmt/logfmt v0.6.0 // indirect

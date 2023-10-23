@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"net"
 	"os"
 	"os/exec"
@@ -10,6 +11,7 @@ import (
 	"github.com/charmbracelet/log"
 	"github.com/erikgeiser/promptkit/confirmation"
 	"github.com/erikgeiser/promptkit/textinput"
+	netmask "github.com/monban/bubble-netmask"
 )
 
 func main() {
@@ -21,21 +23,34 @@ func main() {
 	if dhcp {
 		x("udhcpc")
 	} else {
-		var ip, mask, gw string
+		var ip, gw string
+		var dns []string
 		ip, _ = ipinput("IP address:", "").RunPrompt()
 		ipBytes := net.ParseIP(ip)
 		if ipBytes.To4() == nil { //ipv6 town
 			gw, _ = ipinput("Default gateway:", "").RunPrompt()
 			x("ifconfig", "eth0", ip)
 		} else { // ipv4
-			maskBytes := ipBytes.DefaultMask()
 			ipBytes[len(ipBytes)-1]++
-			mask, _ = maskinput(maskBytes).RunPrompt()
+			mask, err := netmask.New(ipBytes.String()).Run()
+			if err != nil {
+				log.Fatal(err)
+			}
 			gwInitial := ip[:strings.LastIndex(ip, ".")+1]
 			gw, _ = ipinput("Default gateway:", gwInitial).RunPrompt()
-			x("ifconfig", "eth0", ip, "netmask", mask)
+			dns = getDNSServers()
+			x("ifconfig", "eth0", ip, "netmask", netmask.NetMaskString(mask))
 		}
 		x("route", "add", "default", "gw", gw)
+		resolv, err := getResolv()
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer resolv.Close()
+		err = writeDNS(resolv, dns)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 
@@ -67,8 +82,41 @@ func ipinput(prompt string, dlft string) *textinput.TextInput {
 	return input
 }
 
-func maskinput(mask net.IPMask) *textinput.TextInput {
-	input := textinput.New("Network mask:")
-	input.InitialValue = net.IP(mask).String()
-	return input
+func getDNSServers() []string {
+	var servers []string
+	for {
+		ti := textinput.New("DNS server")
+		ti.Validate = nil
+		str, err := ti.RunPrompt()
+		if err != nil {
+			log.Fatal(err)
+		}
+		if str == "" {
+			break
+		}
+		servers = append(servers, str)
+	}
+	return servers
+}
+
+func getResolv() (io.WriteCloser, error) {
+	if os.Getenv("USER") != "root" {
+		log.Info("not root, so writing to stdout")
+		return os.Stdout, nil
+	}
+	resolv, err := os.Create("/etc/resolv.conf")
+	if err != nil {
+		return nil, fmt.Errorf("opening resolv.conf: %w", err)
+	}
+	return resolv, nil
+}
+
+func writeDNS(w io.Writer, servers []string) error {
+	for _, srv := range servers {
+		_, err := fmt.Fprintf(w, "nameserver %s\n", srv)
+		if err != nil {
+			return fmt.Errorf("writing dns server: %w", err)
+		}
+	}
+	return nil
 }
