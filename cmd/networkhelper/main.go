@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"strings"
 
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/log"
 	"github.com/erikgeiser/promptkit/confirmation"
 	"github.com/erikgeiser/promptkit/textinput"
@@ -15,6 +16,12 @@ import (
 )
 
 func main() {
+	// n := textinput.NewModel(textinput.New("hello"))
+	var m Menu = New()
+	var p *tea.Program = tea.NewProgram(m)
+	p.Run()
+	os.Exit(0)
+
 	c := confirmation.New("Connect DHCP?", confirmation.Yes)
 	dhcp, err := c.RunPrompt()
 	if err != nil {
