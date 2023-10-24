@@ -22,6 +22,8 @@ func main() {
 	}
 	if dhcp {
 		x("udhcpc")
+		x("ifconfig")
+		x("route")
 	} else {
 		var ip, gw string
 		var dns []string
