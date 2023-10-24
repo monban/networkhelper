@@ -58,7 +58,9 @@ func main() {
 
 func x(cmd string, args ...string) {
 	if os.Getenv("USER") == "root" {
-		exec.Command(cmd, args...).Run()
+		cmd := exec.Command(cmd, args...)
+		cmd.Stdout = os.Stdout
+		cmd.Run()
 	} else {
 		log.Infof("SIMULATION: %s %s", cmd, args)
 	}
