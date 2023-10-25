@@ -1,6 +1,6 @@
 module networkhelper
 
-go 1.21.3
+go 1.21
 
 require (
 	github.com/charmbracelet/bubbletea v0.24.2
