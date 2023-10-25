@@ -13,6 +13,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    
+    - name: apt-install
+      uses: daaku/gh-action-apt-install@v4
+      with:
+        packages: genisoimage
 
     - name: Build
       run: make
