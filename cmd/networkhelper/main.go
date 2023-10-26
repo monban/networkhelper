@@ -16,9 +16,15 @@ import (
 )
 
 func main() {
+	f, err := os.Create("menu.log")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+	log.SetOutput(f)
 	// n := textinput.NewModel(textinput.New("hello"))
 	var m Menu = New()
-	var p *tea.Program = tea.NewProgram(m)
+	var p *tea.Program = tea.NewProgram(m, tea.WithAltScreen())
 	p.Run()
 	os.Exit(0)
 

@@ -30,3 +30,5 @@ require (
 	golang.org/x/term v0.13.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
 )
+
+replace github.com/erikgeiser/promptkit v0.9.0 => github.com/monban/promptkit v0.0.0-20231026030123-42e8394b65cb
